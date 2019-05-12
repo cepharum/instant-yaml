@@ -1,0 +1,29 @@
+{
+  "name": "simple-yaml",
+  "version": "0.1.0",
+  "description": "a very simple YAML parser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cepharum/simple-yaml.git"
+  },
+  "keywords": [
+    "YAML"
+  ],
+  "author": "cepharum GmbH",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cepharum/simple-yaml/issues"
+  },
+  "homepage": "https://github.com/cepharum/simple-yaml#readme",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-cepharum": "^1.0.8",
+    "eslint-plugin-promise": "^4.1.1",
+    "mocha": "^6.1.4",
+    "should": "^13.2.3"
+  }
+}
