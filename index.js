@@ -108,7 +108,7 @@ function escapes( _, code ) {
  * Implements very basic YAML parser not complying with any standard most
  * probably.
  */
-module.exports = class YAML {
+module.exports.YAML = {
 	/**
 	 * Extracts data structure from provided string assumed to contain some YAML
 	 * code.
@@ -116,7 +116,7 @@ module.exports = class YAML {
 	 * @param {string} code string assumed to contain YAML code
 	 * @returns {object} data structure described by YAML code
 	 */
-	static parse( code ) {
+	parse: function( code ) {
 		if ( typeof code !== "string" ) {
 			return typeof code === "object" && code ? code : null;
 		}
@@ -627,7 +627,7 @@ module.exports = class YAML {
 		}
 
 		return stack[stack.length - 1].ref;
-	}
+	},
 
 	/**
 	 * Collects provided node in given context.
@@ -636,7 +636,7 @@ module.exports = class YAML {
 	 * @param {object} contextStack LIFO queue of objects to consume data
 	 * @returns {void}
 	 */
-	static consume( node, contextStack ) {
+	consume: function( node, contextStack ) {
 		const { depth } = node;
 
 		if ( !isNaN( parseInt( depth ) ) ) {
@@ -743,7 +743,7 @@ module.exports = class YAML {
 			default :
 				if ( node.folded ) {
 					const mode = /^([|>])([+-])?$/.exec( node.folded );
-					node.value = node.value.replace( /(\n\s*$)|(?:\n([^ \t]))/g, ( _, end, inner ) => {
+					node.value = node.value.replace( /(\n\s*$)|(?:\n([^ \t]))/g, function( _, end, inner ) {
 						if ( end ) {
 							switch ( mode[2] ) {
 								case "+" :
@@ -781,5 +781,5 @@ module.exports = class YAML {
 		} else {
 			collector[node.name] = node.value;
 		}
-	}
+	},
 };
