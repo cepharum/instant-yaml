@@ -24,7 +24,7 @@ Preferring YAML over JSON might help with receiving structured information from 
 
 ## What are we using it for?
 
-This parser has been developed as part of our forms processor which is an engine for having quite complex sequences of forms rendered in a browser. This engine takes a just as complex definition of that sequence and it turned out YAML is much easier to manage long term than JSON. That engine is designed to run in a browser. We've checked out [js-yaml](https://www.npmjs.com/package/js-yaml) and [yaml](https://www.npmjs.com/package/yaml) but dropped them for their dependency and for increasing the engine's size by roughly 50%. That's unacceptable ... in the end we've started our own YAML parser.
+This parser has been developed as part of our [forms processor](https://www.npmjs.com/package/forms-processor) which is an engine for having quite complex sequences of forms rendered in a browser. This engine takes a just as complex definition of that sequence and it turned out YAML is much easier to manage long term than JSON. That engine is designed to run in a browser. We've checked out [js-yaml](https://www.npmjs.com/package/js-yaml) and [yaml](https://www.npmjs.com/package/yaml) but dropped them for their dependency and for increasing the engine's size by roughly 50%. That's unacceptable ... in the end we've started our own YAML parser.
 
 ## License
 
