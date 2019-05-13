@@ -82,7 +82,7 @@ const EmptyArray = [];
  * @returns {void}
  */
 function ParserError( type, line, column ) {
-	throw new Error( `${type} in line ${line}, column ${column}` );
+	throw new Error( type + " in line " + line + ", column " + column );
 }
 
 /**
@@ -184,8 +184,8 @@ module.exports.YAML = {
 
 							node = {
 								depth: indentation,
-								line,
-								column,
+								line: line,
+								column: column,
 							};
 
 							startBlock = cursor;
@@ -357,8 +357,8 @@ module.exports.YAML = {
 									node = {
 										depth: node.depth + 1 + passed.match( /^\s*/ )[0].length,
 										name: trimmed,
-										line,
-										column,
+										line: line,
+										column: column,
 									};
 
 									startBlock = cursor + 1;
@@ -382,8 +382,8 @@ module.exports.YAML = {
 									node = {
 										depth: node.depth + 1 + passed.match( /^\s*/ )[0].length,
 										array: true,
-										line,
-										column,
+										line: line,
+										column: column,
 									};
 
 									startBlock = cursor + 1;
@@ -557,8 +557,8 @@ module.exports.YAML = {
 									node = {
 										depth: node.startQuote + 1 + node.value.match( /^\s*/ )[0].length,
 										name: trimmed,
-										line,
-										column,
+										line: line,
+										column: column,
 									};
 
 									mode = ParserModes.VALUE;
@@ -637,7 +637,7 @@ module.exports.YAML = {
 	 * @returns {void}
 	 */
 	consume: function( node, contextStack ) {
-		const { depth } = node;
+		const depth = node.depth;
 
 		if ( !isNaN( parseInt( depth ) ) ) {
 			for ( ;; ) {
@@ -696,7 +696,7 @@ module.exports.YAML = {
 
 				contextStack.unshift( {
 					depth: NaN,
-					selector,
+					selector: selector,
 					ref: sub,
 				} );
 
@@ -721,7 +721,7 @@ module.exports.YAML = {
 			}
 
 			// need to switch current level's type of collection
-			const { selector } = contextStack[0];
+			const selector = contextStack[0].selector;
 
 			if ( node.array ) {
 				collector = contextStack[0].ref = [];
