@@ -295,7 +295,6 @@ module.exports.YAML = {
 					// searching for colon separating name from value
 					switch ( ch ) {
 						case ":" :
-							node.name = code.substring( startBlock, cursor );
 							mode = ParserModes.VALUE;
 							startBlock = cursor + 1;
 							break;
