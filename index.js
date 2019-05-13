@@ -135,8 +135,8 @@ module.exports.YAML = {
 		let startBlock = 0;
 
 
-		for ( let cursor = 0; cursor < numCharacters; cursor++, column++ ) {
-			const ch = code[cursor];
+		for ( let cursor = 0; cursor <= numCharacters; cursor++, column++ ) {
+			const ch = cursor < numCharacters ? code[cursor] : "\n";
 
 			switch ( mode ) {
 				case ParserModes.LEADING_SPACE :
@@ -464,8 +464,8 @@ module.exports.YAML = {
 					switch ( ch ) {
 						case "\r" :
 							isCrLf = true;
-							// falls through
 
+							// falls through
 						case "\n" : {
 							const _pre = code.substr( startBlock, node.foldedIndentation );
 							let _line = code.substring( startBlock + node.foldedIndentation, cursor );
@@ -576,7 +576,7 @@ module.exports.YAML = {
 					break;
 			}
 
-			if ( ch === "\n" ) {
+			if ( ch === "\n" && cursor < numCharacters ) {
 				if ( node && node.folded && node.value != null ) {
 					node.value += "\n";
 				}
@@ -611,6 +611,11 @@ module.exports.YAML = {
 				break;
 
 			case ParserModes.LEADING_SPACE :
+				if ( node && node.folded ) {
+					this.consume( node, stack );
+				}
+				break;
+
 			case ParserModes.COMMENT :
 				break;
 
