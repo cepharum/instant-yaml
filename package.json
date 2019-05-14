@@ -4,7 +4,8 @@
   "description": "a very simple YAML parser",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --recursive --ui bdd test/unit/*.js",
+    "conversion-test": "node test/conversion/runner.js"
   },
   "repository": {
     "type": "git",
