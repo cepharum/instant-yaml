@@ -766,9 +766,9 @@ module.exports.YAML = {
 
 					if ( trimmedValue === "null" ) {
 						node.value = null;
-					} else if ( /^y(?:es)?|true|on$/i.test( trimmedValue ) ) {
+					} else if ( /^(?:y(?:es)?|true|on)$/i.test( trimmedValue ) ) {
 						node.value = true;
-					} else if ( /^no?|false|off$/i.test( trimmedValue ) ) {
+					} else if ( /^(?:no?|false|off)$/i.test( trimmedValue ) ) {
 						node.value = false;
 					} else if ( /^[+-]?\d(?:\.[d]+)?$/i.test( trimmedValue ) ) {
 						node.value = parseFloat( trimmedValue );
