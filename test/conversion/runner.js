@@ -36,13 +36,21 @@ const Child = require( "child_process" );
 const [name] = process.argv.slice( 2 );
 
 if ( name ) {
+	process.stderr.write( "* testing " + Path.relative( __dirname, name ) + " ...", "utf8" ); // eslint-disable-line no-console
+
 	const { YAML } = require( "../../" );
 
 	const code = File.readFileSync( name + ".yml", { encoding: "utf8" } );
-	const parsed = YAML.parse( code );
 	const expected = require( name + ".json" );
+	let parsed;
 
-	process.stderr.write( "* testing " + Path.relative( __dirname, name ) + " ...", "utf8" ); // eslint-disable-line no-console
+	try {
+		parsed = YAML.parse( code );
+	} catch ( error ) {
+		console.error( "\n  - Parser Error: " + error.message ); // eslint-disable-line no-console
+		process.exit( 1 );
+	}
+
 	if ( !deepCompare( parsed, expected ) ) {
 		process.exit( 1 );
 	}
@@ -131,8 +139,10 @@ function testNext( allPairs, current, stopAt ) {
  * @return {boolean} true if both values are equivalent, false otherwise
  */
 function deepCompare( actual, expected, prefix = "" ) {
+	const label = prefix === "" ? "<root>" : prefix;
+
 	if ( typeof actual !== typeof expected ) {
-		console.error( `\n  - type of value different @ ${label}: expected ${typeof expected}, but got ${typeof actual}` ); // eslint-disable-line no-console
+		console.error( `\n  - type of value different @ ${label}: expected ${typeof expected} ${expected}, but got ${typeof actual} ${actual}` ); // eslint-disable-line no-console
 		return false;
 	}
 
@@ -140,8 +150,6 @@ function deepCompare( actual, expected, prefix = "" ) {
 		console.error( `\n  - boolean value different @ ${label}: expected ${expected}, but got ${actual}` ); // eslint-disable-line no-console
 		return false;
 	}
-
-	const label = prefix === "" ? "<root>" : prefix;
 
 	switch ( typeof actual ) {
 		case "object" :
