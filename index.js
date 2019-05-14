@@ -54,6 +54,8 @@ const ParserModes = {
 	COMMENT: 10,
 	// skipping any trailing space while searching next linebreak
 	LINEBREAK: 11,
+	// tries to detect reason for a leading dash
+	GOT_DASH: 12,
 };
 
 const Errors = {
@@ -64,6 +66,7 @@ const Errors = {
 	depth: "invalid depth of hierarchy",
 	exists: "replacing existing property of same object",
 	collection: "invalid mix of collections",
+	scalar: "collection expected, but got scalar",
 	folded: "invalid folded value",
 	quote: "missing closing quote",
 	eof: "unexpected end of file",
@@ -114,9 +117,10 @@ module.exports.YAML = {
 	 * code.
 	 *
 	 * @param {string} code string assumed to contain YAML code
+	 * @param {object[]} tokens array used to successively consume passed tokens
 	 * @returns {object} data structure described by YAML code
 	 */
-	parse: function( code ) {
+	parse: function( code, tokens = [] ) {
 		if ( typeof code === "object" && code ) {
 			return code;
 		}
@@ -137,6 +141,8 @@ module.exports.YAML = {
 		let line = 1;
 		let column = 1;
 		let startBlock = 0;
+		let startLine = 0;
+		let lineIndentation = 0;
 
 
 		for ( let cursor = 0; cursor <= numCharacters; cursor++, column++ ) {
@@ -162,14 +168,15 @@ module.exports.YAML = {
 							break;
 
 						default : {
-							const indentation = cursor - startBlock;
+							startLine = startBlock;
+							lineIndentation = cursor - startLine;
 
 							if ( node ) {
 								if ( node.folded ) {
-									if ( indentation > node.depth ) {
+									if ( lineIndentation > node.depth ) {
 										// line is folded continuation of previous line
 										if ( node.value == null ) { // eslint-disable-line max-depth
-											node.foldedIndentation = indentation - node.depth;
+											node.foldedIndentation = lineIndentation - node.depth;
 										}
 
 										startBlock += node.depth;
@@ -180,14 +187,14 @@ module.exports.YAML = {
 
 									// previous folded node has actually ended
 									// at most recently passed line break
-									this.consume( node, stack );
+									this.consume( node, stack, tokens );
 									node = null;
 								}
 							}
 
 
 							node = {
-								depth: indentation,
+								depth: lineIndentation,
 								line: line,
 								column: column,
 							};
@@ -201,10 +208,8 @@ module.exports.YAML = {
 									break;
 
 								case "-" :
-									node.array = true;
-
-									mode = ParserModes.VALUE;
-									startBlock = cursor + 1;
+									mode = ParserModes.GOT_DASH;
+									startBlock = cursor;
 									break;
 
 								default :
@@ -213,6 +218,40 @@ module.exports.YAML = {
 									column--;
 							}
 						}
+					}
+					break;
+
+				case ParserModes.GOT_DASH :
+					switch ( ch ) {
+						case "\r" :
+							node.isArrayItem = true;
+							node.value = EmptyObject;
+							this.consume( node, stack, tokens );
+
+							mode = ParserModes.LF;
+							break;
+
+						case "\n" :
+							node.isArrayItem = true;
+							node.value = EmptyObject;
+							this.consume( node, stack, tokens );
+
+							mode = ParserModes.LEADING_SPACE;
+
+							startBlock = cursor + 1;
+							break;
+
+						case " " :
+						case "\t" :
+							node.isArrayItem = true;
+
+							mode = ParserModes.VALUE;
+							startBlock = cursor + 1;
+							break;
+
+						default :
+							ParserError( Errors.character, line, column );
+							break;
 					}
 					break;
 
@@ -232,14 +271,18 @@ module.exports.YAML = {
 					// while searching for colon marking end of name
 					switch ( ch ) {
 						case ":" :
-							node.name = code.substring( startBlock, cursor ).trim();
+							node.isProperty = true;
+							node.propertyName = code.substring( startBlock, cursor ).trim();
+
 							mode = ParserModes.VALUE;
 							startBlock = cursor + 1;
 							break;
 
 						case " " :
 						case "\t" : {
-							node.name = code.substring( startBlock, cursor ).trim();
+							node.isProperty = true;
+							node.propertyName = code.substring( startBlock, cursor ).trim();
+
 							mode = ParserModes.COLON;
 							break;
 						}
@@ -276,7 +319,9 @@ module.exports.YAML = {
 							break;
 
 						case code[startBlock] :
-							node.name = code.substring( startBlock + 1, cursor ).replace( /\\(.)/g, escapes );
+							node.isProperty = true;
+							node.propertyName = code.substring( startBlock + 1, cursor ).replace( /\\(.)/g, escapes );
+
 							mode = ParserModes.COLON;
 							break;
 					}
@@ -338,53 +383,37 @@ module.exports.YAML = {
 
 						case "\r" :
 							node.value = code.substring( startBlock, cursor ).trim();
+							if ( node.value === "" ) {
+								node.value = EmptyObject;
+							}
+
 							mode = ParserModes.LF;
 							break;
 
 						case "\n" :
 							node.value = code.substring( startBlock, cursor ).trim();
+							if ( node.value === "" ) {
+								node.value = EmptyObject;
+							}
+
 							mode = ParserModes.LEADING_SPACE;
 
 							startBlock = cursor + 1;
 							break;
 
 						case ":" :
-							if ( node.array ) {
+							if ( node.isArrayItem ) {
 								const passed = code.substring( startBlock, cursor );
 								const trimmed = passed.trim();
 
 								if ( /^[a-zA-Z0-9_]+$/.test( trimmed ) ) {
 									node.value = EmptyObject;
-									this.consume( node, stack );
+									this.consume( node, stack, tokens );
 
 									node = {
 										depth: node.depth + 1 + passed.match( /^\s*/ )[0].length,
-										name: trimmed,
-										line: line,
-										column: column,
-									};
-
-									startBlock = cursor + 1;
-
-									break;
-								}
-
-								ParserError( Errors.character, line, column );
-							}
-							break;
-
-						case "-" :
-							if ( node.array ) {
-								const passed = code.substring( startBlock, cursor );
-								const trimmed = passed.trim();
-
-								if ( !trimmed.length ) {
-									node.value = EmptyArray;
-									this.consume( node, stack );
-
-									node = {
-										depth: node.depth + 1 + passed.match( /^\s*/ )[0].length,
-										array: true,
+										isProperty: true,
+										propertyName: trimmed,
 										line: line,
 										column: column,
 									};
@@ -418,7 +447,7 @@ module.exports.YAML = {
 
 						// falls through
 						default :
-							this.consume( node, stack );
+							this.consume( node, stack, tokens );
 							node = null;
 					}
 
@@ -525,14 +554,14 @@ module.exports.YAML = {
 							break;
 
 						case "\r" :
-							this.consume( node, stack );
+							this.consume( node, stack, tokens );
 							node = null;
 
 							mode = ParserModes.LF;
 							break;
 
 						case "\n" :
-							this.consume( node, stack );
+							this.consume( node, stack, tokens );
 							node = null;
 
 							mode = ParserModes.LEADING_SPACE;
@@ -541,23 +570,24 @@ module.exports.YAML = {
 							break;
 
 						case "#" :
-							this.consume( node, stack );
+							this.consume( node, stack, tokens );
 							node = null;
 
 							mode = ParserModes.COMMENT;
 							break;
 
 						case ":" :
-							if ( node.array && typeof node.value === "string" ) {
+							if ( node.isArrayItem && typeof node.value === "string" ) {
 								const trimmed = node.value;
 
 								if ( /^[a-zA-Z0-9_]+$/.test( trimmed ) ) {
 									node.value = EmptyObject;
-									this.consume( node, stack );
+									this.consume( node, stack, tokens );
 
 									node = {
 										depth: node.startQuote + 1 + node.value.match( /^\s*/ )[0].length,
-										name: trimmed,
+										isProperty: true,
+										propertyName: trimmed,
 										line: line,
 										column: column,
 									};
@@ -603,18 +633,18 @@ module.exports.YAML = {
 
 					// falls through
 					default :
-						this.consume( node, stack );
+						this.consume( node, stack, tokens );
 						node = null;
 				}
 				break;
 
 			case ParserModes.LINEBREAK :
-				this.consume( node, stack );
+				this.consume( node, stack, tokens );
 				break;
 
 			case ParserModes.LEADING_SPACE :
 				if ( node && node.folded ) {
-					this.consume( node, stack );
+					this.consume( node, stack, tokens );
 				}
 				break;
 
@@ -640,39 +670,38 @@ module.exports.YAML = {
 	 *
 	 * @param {object} node description of parsed node to be collected
 	 * @param {object} contextStack LIFO queue of objects to consume data
+	 * @param {object[]} tokensCollector list provided to collect all passed tokens
 	 * @returns {void}
 	 */
-	consume: function( node, contextStack ) {
+	consume: function( node, contextStack, tokensCollector ) {
 		const depth = node.depth;
 
-		if ( !isNaN( parseInt( depth ) ) ) {
-			for ( ;; ) {
-				const frame = contextStack[0];
-				if ( !frame ) {
-					ParserError( Errors.depth, node.line, node.column );
-					return;
-				}
-
-				const frameDepth = frame.depth;
-
-				if ( isNaN( frameDepth ) ) {
-					// started new level before without knowing its level
-					// -> adopting level of now provided node
-					frame.depth = depth;
-					break;
-				}
-
-				if ( frameDepth === depth ) {
-					// found existing frame matching node's indentation
-					break;
-				}
-
-				if ( frameDepth < depth ) {
-					ParserError( Errors.indentation, node.line, node.column );
-				}
-
-				contextStack.shift();
+		for ( ;; ) {
+			const frame = contextStack[0];
+			if ( !frame ) {
+				ParserError( Errors.depth, node.line, node.column );
+				return;
 			}
+
+			const frameDepth = frame.depth;
+
+			if ( isNaN( frameDepth ) && ( contextStack[1] || {} ).depth < depth ) {
+				// started new level before without knowing its level
+				// -> adopting level of now provided node
+				frame.depth = depth;
+				break;
+			}
+
+			if ( frameDepth === depth ) {
+				// found existing frame matching node's indentation
+				break;
+			}
+
+			if ( frameDepth < depth ) {
+				ParserError( Errors.indentation, node.line, node.column );
+			}
+
+			contextStack.shift();
 		}
 
 
@@ -686,7 +715,7 @@ module.exports.YAML = {
 				let ref = contextStack[0].ref;
 				let isArray = Array.isArray( ref );
 
-				if ( node.array && !isArray ) {
+				if ( node.isArrayItem && !isArray ) {
 					if ( Object.keys( ref ).length === 0 ) {
 						ref = contextStack[0].ref = [];
 						isArray = true;
@@ -697,7 +726,7 @@ module.exports.YAML = {
 					}
 				}
 
-				const selector = isArray ? ref.length : node.name;
+				const selector = isArray ? ref.length : node.propertyName;
 				const sub = node.value === EmptyArray ? [] : {};
 
 				contextStack.unshift( {
@@ -709,19 +738,21 @@ module.exports.YAML = {
 				if ( isArray ) {
 					ref.push( sub );
 				} else {
-					ref[node.name] = sub;
+					ref[node.propertyName] = sub;
 				}
 
+				tokensCollector.push( node );
 				return;
 			}
 		}
 
 
-		let collector = contextStack[0].ref;
+		let collection = contextStack[0].ref;
 
-		if ( node.array ^ Array.isArray( collector ) ) {
+
+		if ( node.isArrayItem ^ Array.isArray( collection ) ) {
 			// mismatching type of collection at current level of hierarchy
-			if ( Object.keys( collector ).length > 0 ) {
+			if ( Object.keys( collection ).length > 0 ) {
 				ParserError( Errors.collection, node.line, node.column );
 				return;
 			}
@@ -729,16 +760,17 @@ module.exports.YAML = {
 			// need to switch current level's type of collection
 			const selector = contextStack[0].selector;
 
-			if ( node.array ) {
-				collector = contextStack[0].ref = [];
+			if ( node.isArrayItem ) {
+				collection = contextStack[0].ref = [];
 			} else {
-				collector = contextStack[0].ref = {};
+				collection = contextStack[0].ref = {};
 			}
 
-			if ( selector && contextStack.length > 1 ) {
-				contextStack[1].ref[selector] = contextStack[0].ref;
+			if ( selector != null && contextStack.length > 1 ) {
+				contextStack[1].ref[selector] = collection;
 			}
 		}
+
 
 		switch ( node.value ) {
 			case EmptyObject :
@@ -774,7 +806,7 @@ module.exports.YAML = {
 						node.value = true;
 					} else if ( /^(?:no?|false|off)$/i.test( trimmedValue ) ) {
 						node.value = false;
-					} else if ( trimmedValue.length > 0 && /^(?:[+-]?\d+)?(?:\.[d]+)?$/i.test( trimmedValue ) ) {
+					} else if ( trimmedValue.replace( /^[+-]/, "" ).length > 0 && /^(?:[+-])?(?:\d+)?(?:\.\d+)?$/i.test( trimmedValue ) ) {
 						node.value = parseFloat( trimmedValue );
 					} else {
 						node.value = trimmedValue;
@@ -782,10 +814,14 @@ module.exports.YAML = {
 				}
 		}
 
-		if ( node.array ) {
-			collector.push( node.value );
+		if ( node.isArrayItem ) {
+			collection.push( node.value );
+		} else if ( node.isProperty ) {
+			collection[node.propertyName] = node.value;
 		} else {
-			collector[node.name] = node.value;
+			ParserError( Errors.scalar, node.line, node.column );
 		}
+
+		tokensCollector.push( node );
 	},
 };

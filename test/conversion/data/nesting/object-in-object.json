@@ -1,0 +1,11 @@
+{
+	"outer": {
+		"middle": "some value",
+		"middleToo": {
+			"inner": "another value"
+		},
+		"anotherMiddle": {},
+		"finalMiddle": "more value"
+	},
+	"finalOuter": "last value"
+}

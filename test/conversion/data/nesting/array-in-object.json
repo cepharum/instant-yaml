@@ -1,0 +1,12 @@
+{
+	"first": [
+		"some array-item"
+	],
+	"second": {
+		"middle": {
+			"inner": [
+				"another array:item"
+			]
+		}
+	}
+}

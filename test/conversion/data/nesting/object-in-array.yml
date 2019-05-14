@@ -1,0 +1,7 @@
+-
+  first: value: right
+- something else
+- second:
+-
+  -
+    deeper: set-value
