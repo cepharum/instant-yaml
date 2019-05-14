@@ -389,8 +389,6 @@ module.exports.YAML = {
 
 									break;
 								}
-
-								ParserError( Errors.character, line, column );
 							}
 							break;
 					}
