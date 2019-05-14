@@ -770,7 +770,7 @@ module.exports.YAML = {
 						node.value = true;
 					} else if ( /^(?:no?|false|off)$/i.test( trimmedValue ) ) {
 						node.value = false;
-					} else if ( /^[+-]?\d(?:\.[d]+)?$/i.test( trimmedValue ) ) {
+					} else if ( trimmedValue.length > 0 && /^(?:[+-]?\d+)?(?:\.[d]+)?$/i.test( trimmedValue ) ) {
 						node.value = parseFloat( trimmedValue );
 					} else {
 						node.value = trimmedValue;
