@@ -42,16 +42,17 @@ if ( name ) {
 
 	const code = File.readFileSync( name + ".yml", { encoding: "utf8" } );
 	const expected = require( name + ".json" );
-	let parsed;
+	let parsed, tokens = [];
 
 	try {
-		parsed = YAML.parse( code );
+		parsed = YAML.parse( code, tokens );
 	} catch ( error ) {
-		console.error( "\n  - Parser Error: " + error.message ); // eslint-disable-line no-console
+		console.error( "\n  - Parser Error: " + error.stack ); // eslint-disable-line no-console
 		process.exit( 1 );
 	}
 
 	if ( !deepCompare( parsed, expected ) ) {
+		console.log( tokens ); // eslint-disable-line no-console
 		process.exit( 1 );
 	}
 
