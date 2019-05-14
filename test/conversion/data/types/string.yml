@@ -1,0 +1,24 @@
+- unquoted
+- unquoted-with-dashes
+- unquoted with spaces
+- unquoted  with  tabs
+- "quoted"
+- "quoted with spaces"
+- "quoted with  tabs"
+- 'quoted'
+- 'quoted with spaces'
+- 'quoted with  tabs'
+- "true"
+- "false"
+- "1"
+- "1.0"
+- "-1234"
+- ""
+- "null"
+- "-"
+- ":"
+- "#"
+- "|"
+- ">"
+- NULL
+- Null
