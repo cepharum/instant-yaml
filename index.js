@@ -117,8 +117,12 @@ module.exports.YAML = {
 	 * @returns {object} data structure described by YAML code
 	 */
 	parse: function( code ) {
+		if ( typeof code === "object" && code ) {
+			return code;
+		}
+
 		if ( typeof code !== "string" ) {
-			return typeof code === "object" && code ? code : null;
+			throw new TypeError( "invalid or missing code to be parsed" );
 		}
 
 		const numCharacters = code.length;
