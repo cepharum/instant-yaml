@@ -2,6 +2,6 @@ outer:
   middle: some value
   middleToo:
     inner: another value
-  anotherMiddle:
-  finalMiddle: more value
+  anotherMiddle :
+  finalMiddle: inlineSub: more value
 finalOuter: last value

@@ -7,8 +7,10 @@
 		"second": {}
 	},
 	[
-		{
-			"deeper": "set-value"
-		}
+		[
+			{
+				"deeper": "set-value"
+			}
+		]
 	]
 ]

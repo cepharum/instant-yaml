@@ -222,36 +222,54 @@ module.exports.YAML = {
 					break;
 
 				case ParserModes.GOT_DASH :
-					switch ( ch ) {
-						case "\r" :
-							node.isArrayItem = true;
-							node.value = EmptyObject;
+					if ( /\s/.test( ch ) ) {
+						if ( node.isArrayItem || node.isProperty ) {
+							const passed = code.substring( startBlock, cursor );
+
+							node.value = node.isArrayItem ? EmptyArray : EmptyObject;
 							this.consume( node, stack, tokens );
 
-							mode = ParserModes.LF;
-							break;
-
-						case "\n" :
+							node = {
+								depth: node.depth + 1 + passed.match( /^\s*/ )[0].length,
+								isArrayItem: true,
+								line: line,
+								column: column,
+							};
+						} else {
 							node.isArrayItem = true;
-							node.value = EmptyObject;
-							this.consume( node, stack, tokens );
+						}
 
-							mode = ParserModes.LEADING_SPACE;
+						switch ( ch ) {
+							case "\r" :
+								node.value = EmptyObject;
+								this.consume( node, stack, tokens );
 
-							startBlock = cursor + 1;
-							break;
+								mode = ParserModes.LF;
+								break;
 
-						case " " :
-						case "\t" :
-							node.isArrayItem = true;
+							case "\n" :
+								node.value = EmptyArray;
+								this.consume( node, stack, tokens );
 
-							mode = ParserModes.VALUE;
-							startBlock = cursor + 1;
-							break;
+								mode = ParserModes.LEADING_SPACE;
 
-						default :
-							ParserError( Errors.character, line, column );
-							break;
+								startBlock = cursor + 1;
+								break;
+
+							case " " :
+							case "\t" :
+								mode = ParserModes.VALUE;
+								startBlock = cursor + 1;
+								break;
+
+							default :
+								// some unexpected type of whitespace
+								ParserError( Errors.character, line, column );
+						}
+					} else if ( node.isProperty || ( node.isArrayItem && /[\d.]/.test( ch ) ) ) {
+						mode = ParserModes.VALUE;
+					} else {
+						ParserError( Errors.character, line, column );
 					}
 					break;
 
@@ -402,7 +420,7 @@ module.exports.YAML = {
 							break;
 
 						case ":" :
-							if ( node.isArrayItem ) {
+							if ( node.isArrayItem || node.isProperty ) {
 								const passed = code.substring( startBlock, cursor );
 								const trimmed = passed.trim();
 
@@ -419,8 +437,17 @@ module.exports.YAML = {
 									};
 
 									startBlock = cursor + 1;
+								}
+							}
+							break;
 
-									break;
+						case "-" :
+							if ( node.isArrayItem || node.isProperty ) {
+								const passed = code.substring( startBlock, cursor );
+								const trimmed = passed.trim();
+
+								if ( !trimmed.length ) {
+									mode = ParserModes.GOT_DASH;
 								}
 							}
 							break;

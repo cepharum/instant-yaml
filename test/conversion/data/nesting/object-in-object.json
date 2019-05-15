@@ -5,7 +5,9 @@
 			"inner": "another value"
 		},
 		"anotherMiddle": {},
-		"finalMiddle": "more value"
+		"finalMiddle": {
+			"inlineSub": "more value"
+		}
 	},
 	"finalOuter": "last value"
 }
