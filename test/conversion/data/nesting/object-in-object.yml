@@ -3,5 +3,5 @@ outer:
   middleToo:
     inner: another value
   anotherMiddle :
-  finalMiddle: inlineSub: more value
+  finalMiddle: inlineSub: -2.5
 finalOuter: last value
