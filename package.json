@@ -1,30 +1,34 @@
 {
-  "name": "simple-yaml",
+  "name": "instant-yaml",
   "version": "0.1.0",
   "description": "a very simple YAML parser",
-  "main": "index.js",
+  "main": "parser.js",
   "scripts": {
     "test": "mocha --recursive --ui bdd test/unit/*.js",
-    "conversion-test": "node test/conversion/runner.js"
+    "conversion-test": "node test/conversion/runner.js",
+    "minify": "terser --comments -c -m -o parser.min.js parser.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cepharum/simple-yaml.git"
+    "url": "git+https://github.com/cepharum/instant-yaml.git"
   },
   "keywords": [
-    "YAML", "parser", "browser"
+    "YAML",
+    "parser",
+    "browser"
   ],
   "author": "cepharum GmbH",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cepharum/simple-yaml/issues"
+    "url": "https://github.com/cepharum/instant-yaml/issues"
   },
-  "homepage": "https://github.com/cepharum/simple-yaml#readme",
+  "homepage": "https://github.com/cepharum/instant-yaml#readme",
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-cepharum": "^1.0.8",
     "eslint-plugin-promise": "^4.1.1",
     "mocha": "^6.1.4",
-    "should": "^13.2.3"
+    "should": "^13.2.3",
+    "terser": "^3.17.0"
   }
 }
