@@ -42,7 +42,8 @@ if ( name ) {
 
 	const code = File.readFileSync( name + ".yml", { encoding: "utf8" } );
 	const expected = require( name + ".json" );
-	let parsed, tokens = [];
+	const tokens = [];
+	let parsed;
 
 	try {
 		parsed = YAML.parse( code, tokens );
