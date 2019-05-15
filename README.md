@@ -7,7 +7,7 @@ A very simple YAML parser suitable for parsing basic YAML files.
 * It is small.
 * It is fast
 * It works out of the box.
-* It runs in a browser without need for any shim to fake NodeJS features.
+* It runs in a browser without need for any shim to fake NodeJS features. The included sandbox works in MSIE 11.
 * It reads simple YAML files.
 
 ## What is it not?
@@ -18,9 +18,9 @@ A very simple YAML parser suitable for parsing basic YAML files.
 
 ## Why should you use it?
 
-First of all, just return to the question about what it is. If this isn't motivation you might miss a use case for sure.
+First of all, just return to the question about what it is. If this isn't motivation enough you might miss a use case for sure.
 
-Preferring YAML over JSON might help with receiving structured information from human users for YAML is a more human-friendly format. So, when you have an application that processes user-provided data you should consider using YAML. And if you happen to have an application to be run in a user's browser using this YAML parser might be an option. Why? Return to the top! ;)
+Replacing JSON with YAML is often useful on receiving structured information from human users as YAML is a more human-friendly format. So, when you have an application that processes user-provided data you should consider using YAML instead of JSON. And if you happen to have an application to be run in a user's browser using this YAML parser might be an option. Why? Return to the top! ;)
 
 ## What are we using it for?
 

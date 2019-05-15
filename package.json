@@ -12,7 +12,7 @@
     "url": "git+https://github.com/cepharum/simple-yaml.git"
   },
   "keywords": [
-    "YAML"
+    "YAML", "parser", "browser"
   ],
   "author": "cepharum GmbH",
   "license": "MIT",
