@@ -120,7 +120,9 @@ module.exports.YAML = {
 	 * @param {object[]} tokens array used to successively consume passed tokens
 	 * @returns {object} data structure described by YAML code
 	 */
-	parse: function( code, tokens = [] ) {
+	parse: function( code, tokens ) {
+		const _tokens = tokens ? tokens : [];
+
 		if ( typeof code === "object" && code ) {
 			return code;
 		}
@@ -187,7 +189,7 @@ module.exports.YAML = {
 
 									// previous folded node has actually ended
 									// at most recently passed line break
-									this.consume( node, stack, tokens );
+									this.consume( node, stack, _tokens );
 									node = null;
 								}
 							}
@@ -227,7 +229,7 @@ module.exports.YAML = {
 							const passed = code.substring( startBlock, cursor );
 
 							node.value = node.isArrayItem ? EmptyArray : EmptyObject;
-							this.consume( node, stack, tokens );
+							this.consume( node, stack, _tokens );
 
 							node = {
 								depth: node.depth + 1 + passed.match( /^\s*/ )[0].length,
@@ -242,14 +244,14 @@ module.exports.YAML = {
 						switch ( ch ) {
 							case "\r" :
 								node.value = EmptyObject;
-								this.consume( node, stack, tokens );
+								this.consume( node, stack, _tokens );
 
 								mode = ParserModes.LF;
 								break;
 
 							case "\n" :
 								node.value = EmptyArray;
-								this.consume( node, stack, tokens );
+								this.consume( node, stack, _tokens );
 
 								mode = ParserModes.LEADING_SPACE;
 
@@ -426,7 +428,7 @@ module.exports.YAML = {
 
 								if ( /^[a-zA-Z0-9_]+$/.test( trimmed ) ) {
 									node.value = EmptyObject;
-									this.consume( node, stack, tokens );
+									this.consume( node, stack, _tokens );
 
 									node = {
 										depth: node.depth + 1 + passed.match( /^\s*/ )[0].length,
@@ -474,7 +476,7 @@ module.exports.YAML = {
 
 						// falls through
 						default :
-							this.consume( node, stack, tokens );
+							this.consume( node, stack, _tokens );
 							node = null;
 					}
 
@@ -581,14 +583,14 @@ module.exports.YAML = {
 							break;
 
 						case "\r" :
-							this.consume( node, stack, tokens );
+							this.consume( node, stack, _tokens );
 							node = null;
 
 							mode = ParserModes.LF;
 							break;
 
 						case "\n" :
-							this.consume( node, stack, tokens );
+							this.consume( node, stack, _tokens );
 							node = null;
 
 							mode = ParserModes.LEADING_SPACE;
@@ -597,7 +599,7 @@ module.exports.YAML = {
 							break;
 
 						case "#" :
-							this.consume( node, stack, tokens );
+							this.consume( node, stack, _tokens );
 							node = null;
 
 							mode = ParserModes.COMMENT;
@@ -609,7 +611,7 @@ module.exports.YAML = {
 
 								if ( /^[a-zA-Z0-9_]+$/.test( trimmed ) ) {
 									node.value = EmptyObject;
-									this.consume( node, stack, tokens );
+									this.consume( node, stack, _tokens );
 
 									node = {
 										depth: node.startQuote + 1 + node.value.match( /^\s*/ )[0].length,
@@ -660,18 +662,18 @@ module.exports.YAML = {
 
 					// falls through
 					default :
-						this.consume( node, stack, tokens );
+						this.consume( node, stack, _tokens );
 						node = null;
 				}
 				break;
 
 			case ParserModes.LINEBREAK :
-				this.consume( node, stack, tokens );
+				this.consume( node, stack, _tokens );
 				break;
 
 			case ParserModes.LEADING_SPACE :
 				if ( node && node.folded ) {
-					this.consume( node, stack, tokens );
+					this.consume( node, stack, _tokens );
 				}
 				break;
 
