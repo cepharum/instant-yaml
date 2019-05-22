@@ -1,6 +1,6 @@
 # Simple YAML Parser
 
-A very simple YAML parser suitable for parsing basic YAML files.
+A very simple parser for _sort of YAML_ format
 
 ## License
 
@@ -34,6 +34,74 @@ Maybe it helps to explain, why we are using it: We prefer YAML over JSON when as
 This parser has been developed as part of our [forms processor](https://www.npmjs.com/package/forms-processor) which is an engine for having quite complex sequences of forms rendered in a browser. This engine takes a just as complex definition of that sequence. As it turned out YAML is much easier to manage long term than JSON and it's much easier to comprehend and to master for users that come from a less technical background. 
 
 That engine is designed to run in a browser. We've checked out [js-yaml](https://www.npmjs.com/package/js-yaml) and [yaml](https://www.npmjs.com/package/yaml) but dropped them for their dependencies on additional packages and for increasing the engine's size by roughly 50%. That's unacceptable ... in the end we've started developing our own YAML parser.
+
+## You need instant details?
+
+* The parser basically supports sequences:
+
+  ```yaml
+  - first
+  - second
+  - third
+  ```
+
+* The parser basically supports collections:
+
+  ```yaml
+  lastname: Doe
+  firstname: John
+  age: unknown
+  ```
+
+* Collections and sequences can be nested:
+
+  ```yaml
+  - lastname: Doe
+    firstname: John
+    age: unknown
+  - lastname: Doe
+    firstname: Jane
+    age: unknown
+  ```
+
+  or
+
+  ```yaml
+  lastname: Doe
+  firstname: John
+  likes:
+    - bikes
+    - cars
+    - planes
+  ```
+
+* It supports basic types of scalar values such string, numeric, boolean and null value.
+
+  ```yaml
+  string: any text
+  quoted-value: "using double quotes"
+  alt-quoted: 'using single quotes'
+  "quoted names": supported
+  numeric: 1.0
+  boolean: true
+  explicit-null: null
+  ```
+
+* It doesn't support multiple documents using `---` to separate documents from each other.
+
+* At root level, any document must start with a collection or a sequence.
+
+* Long strings can be folded to span multiple lines. But flow-style scalars are not supported.
+
+  ```yaml
+  story: |
+    Well, this is going to take some lines to write down
+    my story. But let's start at the beginning ...
+  ```
+  
+  Folding with `>` is supported as well.
+
+* You can use comments starting with `#`.
 
 ## How To Use It
 
