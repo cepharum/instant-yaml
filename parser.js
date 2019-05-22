@@ -173,9 +173,12 @@
 								break;
 
 							case "#" :
-								mode = node && node.folded ? ParserModes.FOLDED_VALUE : ParserModes.COMMENT;
-								break;
+								if ( !node || !node.folded ) {
+									mode = ParserModes.COMMENT;
+									break;
+								}
 
+								// falls through
 							default : {
 								startLine = startBlock;
 								lineIndentation = cursor - startLine;
@@ -469,12 +472,14 @@
 							case "|" :
 							case "|-" :
 							case "|+" :
+								// got marker for starting folded string in next line
 								node.folded = node.value;
 								node.value = null;
 								break;
 
 							case null :
 							case undefined :
+								// keep searching for end of value
 								break;
 
 							case "" :
@@ -654,6 +659,8 @@
 				}
 			}
 
+
+			// handle last token discovered before
 			switch ( mode ) {
 				case ParserModes.VALUE :
 					node.value = code.substring( startBlock ).trim();
