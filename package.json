@@ -1,6 +1,6 @@
 {
   "name": "instant-yaml",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "a very simple YAML parser",
   "main": "parser.js",
   "scripts": {
