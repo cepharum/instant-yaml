@@ -1,4 +1,4 @@
-# Simple YAML Parser
+# Instant YAML
 
 A very simple parser for _sort of YAML_ format
 
