@@ -551,7 +551,7 @@
 										padding += " ";
 									}
 
-									node.value = node.value.replace( /(^|\n[^\n]+)/g, "$1" + padding );
+									node.value = node.value.replace( /(^|\n(?=\s*\S))/g, "$1" + padding );
 
 									node.foldedIndentation = match.index;
 
