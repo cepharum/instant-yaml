@@ -196,7 +196,7 @@ function deepCompare( actual, expected, prefix = "" ) {
 				return true;
 			}
 
-			console.error( `\n  - different scalar values @ ${label}: expected ${expected}, but got ${actual}` ); // eslint-disable-line no-console
+			console.error( `\n  - different scalar values @ ${label}: expected '${expected}', but got '${actual}'` ); // eslint-disable-line no-console
 			return false;
 	}
 }
