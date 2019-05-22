@@ -19,19 +19,21 @@ MIT
 
 ## What is it not?
 
-* I'm pretty sure it doesn't _fully_ comply with any YAML specification. Please note the focus on _fully_. Just checkout the [conversion test data](https://github.com/cepharum/instant-yaml/tree/master/test/conversion/data) to see the syntax actually supported by this parser.
+* I'm pretty sure it doesn't comply with YAML specifications in several situations. Maybe it is thus misleading to call it a YAML parser at all. But the supported syntax is a subset of YAML as specified. Please checkout the [conversion test data](https://github.com/cepharum/instant-yaml/tree/master/test/conversion/data) to see the syntax actually supported by this parser.
 * It doesn't support any of the more fancy types of data that come with latest specifications.
 * It doesn't care for schemes.
 
 ## Why should you use it?
 
-First of all, just return to the question about what it is. If this isn't motivation enough you might miss a use case for sure.
+First of all, just return to the question about what it is. If this isn't motivation enough you might miss a use case for sure or this parser simply doesn't match your particular requirements.
 
-Replacing JSON with YAML is often useful on receiving structured information from human users as YAML is a more human-friendly format. So, when you have an application that processes user-provided data you should consider using YAML instead of JSON. And if you happen to have an application to be run in a user's browser using this YAML parser might be an option. Why? Return to the top! ;)
+Maybe it helps to explain, why we are using it: We prefer YAML over JSON when asking human users to provide structured information for YAML is a more human-friendly format. So, when you have an application that processes user-provided data you might want to use YAML instead of JSON as well. And if you happen to have an application to be run in a user's browser using this YAML parser might be an option. Why? Return to the top! ;)
 
 ## What are we using it for?
 
-This parser has been developed as part of our [forms processor](https://www.npmjs.com/package/forms-processor) which is an engine for having quite complex sequences of forms rendered in a browser. This engine takes a just as complex definition of that sequence and it turned out YAML is much easier to manage long term than JSON. That engine is designed to run in a browser. We've checked out [js-yaml](https://www.npmjs.com/package/js-yaml) and [yaml](https://www.npmjs.com/package/yaml) but dropped them for their dependency and for increasing the engine's size by roughly 50%. That's unacceptable ... in the end we've started our own YAML parser.
+This parser has been developed as part of our [forms processor](https://www.npmjs.com/package/forms-processor) which is an engine for having quite complex sequences of forms rendered in a browser. This engine takes a just as complex definition of that sequence. As it turned out YAML is much easier to manage long term than JSON and it's much easier to comprehend and to master for users that come from a less technical background. 
+
+That engine is designed to run in a browser. We've checked out [js-yaml](https://www.npmjs.com/package/js-yaml) and [yaml](https://www.npmjs.com/package/yaml) but dropped them for their dependencies on additional packages and for increasing the engine's size by roughly 50%. That's unacceptable ... in the end we've started developing our own YAML parser.
 
 ## How To Use It
 
@@ -49,7 +51,7 @@ The parser is implemented as a CommonJS module. Thus you might inject it in an H
 		const data = YAML.parse( "# This is some sort of YAML code\n\n" )
 	</script>
 
-The first block is used to _forward_ the module's export to become globally available in context of current window. That's why the parser is available as `YAML` after importing it in second block. 
+The first script block is used to _forward_ the module's export to become globally available in context of current window. That's why importing the module in second script block exposes the parser in global variable `YAML` which is then used in third script block. 
 
 ### The Preferred Way
 
