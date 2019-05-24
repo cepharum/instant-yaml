@@ -234,7 +234,9 @@
 						break;
 
 					case ParserModes.GOT_DASH :
-						if ( /\s/.test( ch ) ) {
+						if ( !/\s/.test( ch ) && ( node.isProperty || ( node.isArrayItem && /[\d.]/.test( ch ) ) ) ) {
+							mode = ParserModes.VALUE;
+						} else {
 							if ( node.isArrayItem || node.isProperty ) {
 								const passed = code.substring( startBlock, cursor );
 
@@ -270,18 +272,11 @@
 
 								case " " :
 								case "\t" :
-									mode = ParserModes.VALUE;
-									startBlock = cursor + 1;
-									break;
-
 								default :
-									// some unexpected type of whitespace
-									ParserError( Errors.character, line, column );
+									mode = ParserModes.VALUE;
+									startBlock = cursor;
+									break;
 							}
-						} else if ( node.isProperty || ( node.isArrayItem && /[\d.]/.test( ch ) ) ) {
-							mode = ParserModes.VALUE;
-						} else {
-							ParserError( Errors.character, line, column );
 						}
 						break;
 
@@ -327,11 +322,9 @@
 								break;
 
 							default :
-								if ( /[a-zA-Z0-9_]/.test( ch ) ) {
-									break;
+								if ( /[:]/.test( ch ) ) {
+									ParserError( Errors.character, line, column );
 								}
-
-								ParserError( Errors.character, line, column );
 						}
 						break;
 

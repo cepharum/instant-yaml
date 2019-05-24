@@ -1,6 +1,9 @@
 {
 	"first": [
-		"some array-item"
+		"some array-item",
+		{
+			"sub": "item"
+		}
 	],
 	"second": {
 		"middle": {

@@ -1,0 +1,24 @@
+{
+	"processors": [
+		{
+			"type": "dump"
+		}
+	],
+	"sequence": [
+		{
+			"name": "sole",
+			"fields": [
+				{
+					"name": "sole",
+					"label": "Field"
+				}
+			],
+			"another-prop": [
+				{
+					"name": "sole",
+					"label": "Field"
+				}
+			]
+		}
+	]
+}

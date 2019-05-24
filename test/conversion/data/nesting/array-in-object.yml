@@ -1,5 +1,6 @@
 first:
   - some array-item
+  - sub: item
 second:
   middle:
     inner: - another array:item

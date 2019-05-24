@@ -1,0 +1,11 @@
+[
+	"first",
+	"second",
+	{
+		"value": "third",
+		"label": "Third"
+	},
+	6,
+	0.34,
+	-0.2
+]
