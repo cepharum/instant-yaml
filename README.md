@@ -1,3 +1,7 @@
+# We've moved!
+
+This project's maintenance has moved to a [different repository](https://gitlab.com/cepharum-foss/instant-yaml).
+
 # Instant YAML
 
 A very simple parser for _sort of YAML_ format
